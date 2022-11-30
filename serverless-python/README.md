@@ -190,15 +190,6 @@ pip freeze > requirements.txt
 AWS Secrets Manager を使うこと
 
 
-### DynamoDB
-sls offline startした時に
-```
-Dynamodb Local Started, Visit: http://localhost:8000/shell
-```
-が出力されていればOK。
-seedデータとしてtest/{テーブル名}.jsonを投入しています。
-
-
 ### Tips
 各種エディタにblackなど各ツールのプラグインがあり、設定すると便利。   
 例 VS Codeの場合 (本PJディレクトリ/.vscode/settings.json)
@@ -227,3 +218,5 @@ $ serverless plugin install -n serverless-python-requirements
 $ serverless plugin install -n serverless-offline
 $ serverless plugin install -n serverless-dynamodb-local
 ```
+
+pyenv install は Rosetta を使うと失敗する
