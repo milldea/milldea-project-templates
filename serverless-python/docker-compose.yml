@@ -1,0 +1,11 @@
+version: "3"
+services:
+  sls:
+    build: .
+    container_name: "sls"
+    tty: true
+    volumes:
+      - .:/opt/app
+    ports:
+      - "3000:3000"
+      - "8000:8000"

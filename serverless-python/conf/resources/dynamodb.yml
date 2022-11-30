@@ -1,0 +1,19 @@
+Resources:
+  SampleDynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:provider.environment.DYNAMO_DB_TABLE_NAME}
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: user_name
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+        - AttributeName: user_name
+          KeyType: RANGE
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: ${self:provider.environment.DYNAMO_DB_TABLE_RCU}
+        WriteCapacityUnits: ${self:provider.environment.DYNAMO_DB_TABLE_WCU}

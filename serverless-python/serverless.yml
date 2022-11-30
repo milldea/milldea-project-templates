@@ -1,0 +1,59 @@
+service: serverless-python
+frameworkVersion: '3'
+
+package:
+  exclude:
+    - node_modules/**
+    - .dynamodb/**
+    - .serverless/**
+    - tests/**
+    - .coverage
+    - test/**
+    - spec/**
+    - docker-compose.yml
+    - Dockerfile
+    - package.json
+
+resources:
+  - ${file(conf/resources/dynamodb.yml)}
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: python3.9
+  timeout: 60 # in seconds
+  stage: ${opt:stage, self:custom.defaultStage}
+  environment: ${file(./conf/env/${self:provider.stage}.yml)}
+  iamRoleStatements: ${file(conf/provider/iam.yml)}
+
+plugins:
+  - serverless-python-requirements
+  - serverless-offline
+  - serverless-dynamodb-local
+  - serverless-prune-plugin
+
+custom:
+  defaultStage: local
+  dynamodb:
+    stages: local
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: true
+    seed:
+      development:
+        sources:
+          - table: ${self:provider.environment.DYNAMO_DB_TABLE_NAME}
+            sources: [test_data/dynamo_db/dummy_data.json]
+  serverless-offline:
+    port: 3000
+    host: 0.0.0.0
+
+functions:
+  hello:
+    handler: api.handler.hello
+    events:
+      - httpApi:
+          path: /local/hello
+          method: get
