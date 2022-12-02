@@ -82,6 +82,8 @@ $ aws dynamodb list-tables --endpoint-url http://localhost:8000
 }
 ```
 
+昔はブラウザから /shell でもアクセスできたが、最新のバージョンではアクセスできなくなっています。
+
 その他のコマンド詳細は公式をご確認ください。
 https://docs.aws.amazon.com/cli/latest/reference/dynamodb/index.html
 
@@ -219,4 +221,23 @@ $ serverless plugin install -n serverless-offline
 $ serverless plugin install -n serverless-dynamodb-local
 ```
 
-pyenv install は Rosetta を使うと失敗する
+### M1 Mac の話
+pyenv install は Rosetta を使うと失敗する。
+
+### Docker ファイルの話
+
+* AL2 には標準で java が入っていないので、 yum install している。
+  * （DynamoDB の起動に必要）
+* 複数ポート解放する書き方
+  * EXPOSE 3000 8000
+
+### docker-compose.yml の話
+
+volumes でプロジェクトルートをしている
+Dockerfile で何かファイルを作成していても、 volumesの内容で上書きされる
+（.node-version, .python-version, .anyenv あたりが消えて焦った）
+
+### init.sh の話
+
+コマンドが増えてきて面倒だったので、init.sh にした
+昔は、 serverless-dynamodb-local に dynamodb が依存で付いてきてたらしいが消えたようなので、別途 dynamodb 自体をインストールしている
