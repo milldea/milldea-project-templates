@@ -9,3 +9,15 @@ services:
     ports:
       - "3000:3000"
       - "8000:8000"
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+      - "4584:4584"
+    environment:
+      - DEBUG=true
+      - DEFAULT_REGION=ap-northeast-1
+      - HOSTNAME=localstack
+      - LOCALSTACK_HOSTNAME=localstack
+      - SERVICES=secretsmanager
+      - DATA_DIR=${DATA_DIR- }

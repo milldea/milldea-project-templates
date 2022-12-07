@@ -1,7 +1,7 @@
 # Serverless python template
 
 このプロジェクトは、 serverless framework で python を実行するサンプルです。
-API Gateway + Lambda + DynamoDB の最小構成となっています。
+API Gateway + Lambda + DynamoDB + SecretsManager の最小構成となっています。
 
 ## 環境準備
 
@@ -86,6 +86,17 @@ $ aws dynamodb list-tables --endpoint-url http://localhost:8000
 
 その他のコマンド詳細は公式をご確認ください。
 https://docs.aws.amazon.com/cli/latest/reference/dynamodb/index.html
+
+#### local SecretsManager
+
+ホストマシンから secrets manager 登録
+```
+$  aws --endpoint-url=http://localhost:4566 secretsmanager create-secret --name key --secret-string file://key.json
+```
+
+Binary で登録したい場合は --secret-binary で可能です。
+詳しくは公式をご確認ください。
+https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/create-secret.html
 
 #### Docker 終了
 
