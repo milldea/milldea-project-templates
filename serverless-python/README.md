@@ -50,12 +50,12 @@ $ sh init.sh
 ```
 
 ```sh
-$ yarn sls offline start
+$ sls offline start
 ```
 
 ホストマシンから curl を叩く
 ```
-$ curl --location --request GET 'http://localhost:3000/hello'
+$ curl --location --request GET 'http://localhost:3000/local/hello'
 ```
 
 以下のJSONが返ってきたらOK。

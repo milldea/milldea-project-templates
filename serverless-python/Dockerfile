@@ -31,10 +31,5 @@ RUN echo 'export LANG=C.UTF-8' >> ~/.bash_profile
 RUN echo 'export LANGUAGE=en_US:' >> ~/.bash_profile
 RUN echo 'export PYTHONPATH="${WORKDIR}:$PYTHONPATH"' >> ~/.bash_profile
 
-ADD package.json package.json
-RUN yarn init -y && yarn install
-ADD requirements.txt requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
+RUN yarn global add serverless
 EXPOSE 3000 8000
