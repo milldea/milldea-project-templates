@@ -33,6 +33,7 @@ RUN echo 'export PYTHONPATH="${WORKDIR}:$PYTHONPATH"' >> ~/.bash_profile
 
 ADD package.json package.json
 RUN yarn init -y && yarn install
+ADD requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
