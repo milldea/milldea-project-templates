@@ -30,7 +30,5 @@ RUN set -ex; npm install -g "npm@${NPM_VERSION}" "yarn@${YARN_VERSION}"
 RUN echo 'export LANG=C.UTF-8' >> ~/.bash_profile
 RUN echo 'export LANGUAGE=en_US:' >> ~/.bash_profile
 RUN echo 'export PYTHONPATH="${WORKDIR}:$PYTHONPATH"' >> ~/.bash_profile
-RUN echo 'export LOCALSTACK_HOST="localstack"' >> ~/.bash_profile
-RUN echo 'export DEFAULT_REGION="ap-northeast-1"'  >> ~/.bash_profile
 RUN yarn global add serverless
 EXPOSE 3000
