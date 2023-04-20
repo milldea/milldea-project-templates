@@ -22,3 +22,16 @@ services:
       - HOSTNAME=localstack
       - LOCALSTACK_HOSTNAME=localstack
       - DATA_DIR=${DATA_DIR- }
+  dynamodb_admin:
+    image: aaronshaf/dynamodb-admin
+    tty: true
+    container_name: dynamodb_admin
+    ports:
+      - "8001:8001"
+    depends_on:
+      - localstack
+    environment:
+      DYNAMO_ENDPOINT: http://localstack:4566
+      AWS_REGION: ap-northeast-1
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_ACCESS_KEY: dummy
