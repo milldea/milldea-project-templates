@@ -179,6 +179,14 @@ $ awslocal dynamodb list-tables
 
 ```sh
 $ sls invoke local -f setup_dynamodb
+{
+    "statusCode": 200,
+    "body": {
+        "user_id": "00001",
+        "user_name": "milldea_test",
+        "other": "sample"
+    }
+}
 
 ```
 
