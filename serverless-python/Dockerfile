@@ -10,7 +10,7 @@ ENV PYTHON_MINOR_VERSION=3.9
 RUN yum -y update
 RUN yum install -y wget tar xz git gcc-c++ make \
  libssl-dev zlib zlib1g-dev zlib-devel bzip2 bzip2-devel readline-devel \
- openssl-devel which libffi-devel java-1.8.0-openjdk.aarch64
+ openssl-devel which libffi-devel
 
 WORKDIR ${WORKDIR}
 
@@ -30,6 +30,7 @@ RUN set -ex; npm install -g "npm@${NPM_VERSION}" "yarn@${YARN_VERSION}"
 RUN echo 'export LANG=C.UTF-8' >> ~/.bash_profile
 RUN echo 'export LANGUAGE=en_US:' >> ~/.bash_profile
 RUN echo 'export PYTHONPATH="${WORKDIR}:$PYTHONPATH"' >> ~/.bash_profile
-
+RUN echo 'export LOCALSTACK_HOST="localstack"' >> ~/.bash_profile
+RUN echo 'export DEFAULT_REGION="ap-northeast-1"'  >> ~/.bash_profile
 RUN yarn global add serverless
-EXPOSE 3000 8000
+EXPOSE 3000

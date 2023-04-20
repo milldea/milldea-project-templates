@@ -13,8 +13,8 @@ class SecretsManager:
         if stg == 'local':
             # local 用なので、 secrets 情報はなんでもOK
             session = boto3.session.Session(
-                aws_access_key_id='Dummy',
-                aws_secret_access_key='Dummy'
+                aws_access_key_id='dummy',
+                aws_secret_access_key='dummy'
             )
             client = session.client(
                 service_name='secretsmanager',

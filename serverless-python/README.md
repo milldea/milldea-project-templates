@@ -1,7 +1,11 @@
 # Serverless python template
 
 このプロジェクトは、 serverless framework で python を実行するサンプルです。
-API Gateway + Lambda + DynamoDB + SecretsManager の最小構成となっています。
+API Gateway + Lambda を serverless-framework で実行する最小構成となっています。
+
+また、 localstack により、dynamodb, s3, secretsmanager などの各種サービスも同時に起動します。
+
+本テンプレートではdynamoDB, secretsmanager へアクセスするライブラリのサンプルも付けています。
 
 ## 環境準備
 
@@ -16,14 +20,14 @@ API Gateway + Lambda + DynamoDB + SecretsManager の最小構成となってい�
 
 #### AWS アカウント準備
 
-未設定人のみ、事前に設定しておく
+ホストマシンから AWS CLI を実行する場合はホストマシンで以下の設定しておく
 
 ```sh
 $ aws configure
 AWS Access Key ID [None]: dummy
 AWS Secret Access Key [None]: dummy
-Default region name [None]: 空欄のままでOK
-Default output format [None]: 空欄のままでOK
+Default region name [None]: ap-northeast-1
+Default output format [None]: json
 ```
 
 
@@ -33,6 +37,62 @@ Default output format [None]: 空欄のままでOK
 # コンテナを作成、起動
 $ docker-compose up -d --build
 ```
+
+#### LocalStack のステータス確認
+
+```sh
+$ curl localhost:4566/_localstack/health | jq
+{
+  "features": {
+    "initScripts": "initialized"
+  },
+  "services": {
+    "acm": "available",
+    "apigateway": "available",
+    "cloudformation": "available",
+    "cloudwatch": "available",
+    "config": "available",
+    "dynamodb": "available",
+    "dynamodbstreams": "available",
+    "ec2": "available",
+    "es": "available",
+    "events": "available",
+    "firehose": "available",
+    "iam": "available",
+    "kinesis": "available",
+    "kms": "available",
+    "lambda": "available",
+    "logs": "available",
+    "opensearch": "available",
+    "redshift": "available",
+    "resource-groups": "available",
+    "resourcegroupstaggingapi": "available",
+    "route53": "available",
+    "route53resolver": "available",
+    "s3": "available",
+    "s3control": "available",
+    "secretsmanager": "available",
+    "ses": "available",
+    "sns": "available",
+    "sqs": "available",
+    "ssm": "available",
+    "stepfunctions": "available",
+    "sts": "available",
+    "support": "available",
+    "swf": "available",
+    "transcribe": "available"
+  },
+  "version": "1.1.1.dev"
+}
+```
+
+#### localstack のログを確認
+
+ホストマシンから実行する
+```sh
+$ docker-compose logs -f localstack
+```
+
 #### Docker 接続
 
 ```sh
@@ -47,7 +107,15 @@ $ docker-compose exec sls bash --login
 ```sh
 # 初回は必ず実行する
 $ sh init.sh
+
+# コンテナ内で AWS CLI を実行する場合はコンテナ内で以下の設定しておく
+$ aws configure
+AWS Access Key ID [None]: dummy
+AWS Secret Access Key [None]: dummy
+Default region name [None]: ap-northeast-1
+Default output format [None]: json
 ```
+
 
 ```sh
 $ sls offline start
@@ -66,37 +134,92 @@ $ curl --location --request GET 'http://localhost:3000/local/hello'
 }
 ```
 
-#### DynamoDB 確認
+#### DynamoDB 準備
+
+##### テーブルの作成
+
+コマンドで実行する場合
+```sh
+$ awslocal dynamodb create-table --table-name sample --attribute-definitions \
+        AttributeName=user_id,AttributeType=S \
+        AttributeName=user_name,AttributeType=S \
+    --key-schema AttributeName=user_id,KeyType=HASH \
+     AttributeName=user_name,KeyType=RANGE \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+```
+
+serverless framework で localstack にデプロイする場合(localstack pro版を使っていない場合、非推奨)
+```sh
+$ sls deploy
+```
+
+##### テーブルの構築確認
 
 ホストマシンから aws cli を実行する
 ```sh
-$ aws dynamodb list-tables --endpoint-url http://localhost:8000
+$ aws --endpoint-url http://localhost:4566 dynamodb list-tables 
 ```
+
+コンテナ内から実行する場合
+```sh
+$ awslocal dynamodb list-tables 
+```
+
 
 以下の JSON が取得できれば OK。
 ```
 {
     "TableNames": [
-        "dummy-table"
+        "local"
     ]
 }
 ```
 
-昔はブラウザから /shell でもアクセスできたが、最新のバージョンではアクセスできなくなっています。
+##### レコードの登録と確認
+
+```sh
+$ sls invoke local -f setup_dynamodb
+
+```
 
 その他のコマンド詳細は公式をご確認ください。
 https://docs.aws.amazon.com/cli/latest/reference/dynamodb/index.html
 
-#### local SecretsManager
+#### SecretsManager 準備
 
-ホストマシンから secrets manager 登録
+##### Key の登録
+適当な json ファイルを用意
+```sh
+$ echo "{\"hoge\": \"fuga\"}" >> key.json
 ```
-$  aws --endpoint-url=http://localhost:4566 secretsmanager create-secret --name key --secret-string file://key.json
+
+
+ホストマシンから secrets manager を登録する場合
+```sh
+$ aws --endpoint-url=http://localhost:4566 secretsmanager create-secret --name local-key --secret-string file://key.json
+```
+
+コンテナ内から実行する場合
+```sh
+$ awslocal secretsmanager create-secret --name local-key --secret-string file://key.json
 ```
 
 Binary で登録したい場合は --secret-binary で可能です。
 詳しくは公式をご確認ください。
 https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/create-secret.html
+
+
+##### Key の作成確認
+
+コンテナ内で以下を実行する
+```sh
+$ sls invoke local -f get_secrets
+{
+    "statusCode": 200,
+    "body": "{\"secret\": {\"hoge\": \"fuga\"}}"
+}
+```
+
 
 #### Docker 終了
 
@@ -137,7 +260,7 @@ down すると setup した内容が消えるので注意
     * シークレットの類でない
     * ランタイムで変更しない
 * utils.py
-  * 共通利用可能なメソッド(ビジネスロジックを含まないシンプルなもの)
+  * 共通利用可能なメソッド(ロギングやタイムスタンプ変換などシンプルなもの)
 * errors.py
   * 自前のException定義
 * docker-compose.yml
@@ -237,18 +360,15 @@ pyenv install は Rosetta を使うと失敗する。
 
 ### Docker ファイルの話
 
-* AL2 には標準で java が入っていないので、 yum install している。
-  * （DynamoDB の起動に必要）
 * 複数ポート解放する書き方
   * EXPOSE 3000 8000
 
 ### docker-compose.yml の話
 
 volumes でプロジェクトルートをしている
-Dockerfile で何かファイルを作成していても、 volumesの内容で上書きされる
-（.node-version, .python-version, .anyenv あたりが消えて焦った）
+Dockerfile でファイルを作成しても、 volumes の内容で上書きされる
+（.node-version, .python-version, .anyenv あたりは消えてしまうので注意）
 
 ### init.sh の話
 
-コマンドが増えてきて面倒だったので、init.sh にした
-昔は、 serverless-dynamodb-local に dynamodb が依存で付いてきてたらしいが消えたようなので、別途 dynamodb 自体をインストールしている
+初回起動時のコマンドが増えてきて面倒だったので、init.sh にしています

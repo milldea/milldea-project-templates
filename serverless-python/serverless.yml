@@ -29,31 +29,31 @@ provider:
 plugins:
   - serverless-python-requirements
   - serverless-offline
-  - serverless-dynamodb-local
   - serverless-prune-plugin
+  - serverless-localstack
 
 custom:
   defaultStage: local
-  dynamodb:
-    stages: local
-    start:
-      port: 8000
-      inMemory: true
-      migrate: true
-      seed: true
-    seed:
-      development:
-        sources:
-          - table: ${self:provider.environment.DYNAMO_DB_TABLE_NAME}
-            sources: [test_data/dynamo_db/dummy_data.json]
   serverless-offline:
     port: 3000
     host: 0.0.0.0
+  localstack:
+    host: http://localstack
+    edgePort: 4566
+    region: ap-northeast-1
+    stages:
+      - local
 
 functions:
   hello:
     handler: api.handler.hello
     events:
-      - httpApi:
-          path: /local/hello
+      - http:
+          path: /hello
           method: get
+
+  setup_dynamodb:
+    handler: api.handler.setup_dynamodb
+
+  get_secrets:
+    handler: api.handler.get_secrets
