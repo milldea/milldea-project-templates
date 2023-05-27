@@ -27,6 +27,10 @@
 
 
 # テンプレート
+## spec
+
+設計のテンプレート
+
 ## serverless
 
 serverless framework を使うプロジェクト

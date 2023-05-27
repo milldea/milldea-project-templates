@@ -1,0 +1,114 @@
+openapi: "3.0.2"
+info:
+  version: "1.0.0"
+  title: "ポイント取得API"
+  contact:
+    url: "プロジェクト概要が分かるURLなどが良い"
+  description: "ポイントAPI仕様書"
+
+servers:
+  - url: "xxx"
+    description: 検証環境
+
+paths:
+  /{organization_id}/{user_id}/points:
+    parameters:
+      - schema:
+          type: string
+        name: organization_id
+        in: path
+        required: true
+        description: |
+          企業ID
+      - schema:
+          type: string
+        name: user_id
+        in: path
+        required: true
+        description: |
+          ユーザID
+    get:
+      summary: ポイント取得API
+      operationId: getPoint
+      tags:
+        - ポイント
+      description: "現時点の獲得ポイントを返却する API"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/get_point"
+        "400":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "internal server error."
+    not_found:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "resource not found."
+    invalid_parameter:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "request parameter is invalid."
+    get_point:
+      description: ポイント取得APIのレスポンススキーマ
+      type: object
+      properties:
+        current_points:
+          type: number
+          example: 52
+          nullable: false
+        earned_date:
+          type: string
+          description: '最後にポイントを更新した日'
+          example: '2023-04-25'
+          nullable: true
+      required:
+        - current_points
+        - earned_date
+  responses:
+    "400":
+      description: |
+        パラメータ不正
+        クエリパラメータに organization_id がない、または user_id がない場合
+        他の値が付与していた場合は許容する
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/invalid_parameter"
+    "404":
+      description: |
+        指定のリソースが存在しない
+        サブスクリプションIDが存在しない場合
+        集計タイミングによっては、ユーザが存在しない可能性があるので、その場合は 404 ではなく 0 ポイントを返却する
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/not_found"
+    "500":
+      description: |
+        その他、不明なエラーが発生した場合
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/error"
+
+tags:
+  - name: ポイント
